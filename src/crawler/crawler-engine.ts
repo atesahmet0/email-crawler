@@ -24,6 +24,7 @@ interface QueueItem {
 interface CrawlState {
   queue: QueueItem[];
   visited: Set<string>;
+  queued: Set<string>; // Track URLs already in queue to prevent duplicates
   results: ExtractionResult[];
 }
 
@@ -62,6 +63,7 @@ export class CrawlerEngineImpl implements CrawlerEngine {
     const state: CrawlState = {
       queue: [{ url: normalizedStartURL, depth: 0 }],
       visited: new Set<string>(),
+      queued: new Set<string>([normalizedStartURL]), // Track queued URLs
       results: [],
     };
 
@@ -83,8 +85,9 @@ export class CrawlerEngineImpl implements CrawlerEngine {
         continue;
       }
 
-      // Mark as visited
+      // Mark as visited and remove from queued set
       state.visited.add(item.url);
+      state.queued.delete(item.url);
       pagesVisited++;
 
       // Log URL visit
@@ -109,39 +112,39 @@ export class CrawlerEngineImpl implements CrawlerEngine {
         continue;
       }
 
-      // Parse HTML content and extract emails
+      // Parse HTML content and extract emails immediately
       let parsed;
-      let emails: string[] = [];
       
       try {
+        // Parse HTML
         parsed = parse(response.body);
         
         // Clear response body from memory immediately after parsing
         response.body = '';
         
-        // Extract emails from text content
-        emails = extract(parsed.textContent);
+        // Extract emails and add to results immediately (no intermediate storage)
+        const emails = extract(parsed.textContent);
         
         // Clear text content from memory after extraction
         parsed.textContent = '';
+        
+        // Log email discovery results
+        if (emails.length > 0) {
+          this.logger.logEmailsFound(item.url, emails, emails.length);
+          
+          // Add extraction results immediately and clear the emails array
+          for (const email of emails) {
+            state.results.push({
+              email,
+              sourceURL: item.url,
+            });
+          }
+        } else {
+          this.logger.logNoEmailsFound(item.url);
+        }
       } catch (error) {
         this.logger.logHTTPError(item.url, `Failed to parse/extract: ${error instanceof Error ? error.message : String(error)}`);
         continue;
-      }
-
-      // Log email discovery results
-      if (emails.length > 0) {
-        this.logger.logEmailsFound(item.url, emails, emails.length);
-      } else {
-        this.logger.logNoEmailsFound(item.url);
-      }
-
-      // Add extraction results
-      for (const email of emails) {
-        state.results.push({
-          email,
-          sourceURL: item.url,
-        });
       }
 
       // Discover same-domain links and add to queue (if not at max depth)
@@ -159,12 +162,15 @@ export class CrawlerEngineImpl implements CrawlerEngine {
             try {
               const normalizedLink = normalizeURL(link);
               
-              // Only add if not already visited and queue isn't too large
-              if (!state.visited.has(normalizedLink) && state.queue.length < 1000) {
+              // Only add if not already visited, not already queued, and queue isn't too large
+              if (!state.visited.has(normalizedLink) && 
+                  !state.queued.has(normalizedLink) && 
+                  state.queue.length < 1000) {
                 state.queue.push({
                   url: normalizedLink,
                   depth: item.depth + 1,
                 });
+                state.queued.add(normalizedLink); // Mark as queued
                 addedToQueue++;
               }
             } catch (error) {
@@ -183,7 +189,6 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       
       // Trigger garbage collection hint by clearing references
       parsed = null;
-      emails = [];
       response = null as any;
       
       // Allow event loop to process (helps with memory management)
