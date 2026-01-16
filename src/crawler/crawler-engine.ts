@@ -99,6 +99,13 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       // Extract emails from text content
       const emails = extract(parsed.textContent);
 
+      // Log email discovery results
+      if (emails.length > 0) {
+        this.logger.logEmailsFound(item.url, emails, emails.length);
+      } else {
+        this.logger.logNoEmailsFound(item.url);
+      }
+
       // Add extraction results
       for (const email of emails) {
         state.results.push({

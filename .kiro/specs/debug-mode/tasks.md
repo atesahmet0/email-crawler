@@ -96,8 +96,8 @@
     - **Property 8: HTTP errors are logged**
     - **Validates: Requirements 5.2**
 
-- [ ] 5. Integrate logger into email extraction
-  - [ ] 5.1 Update CrawlerEngine to log email discoveries
+- [x] 5. Integrate logger into email extraction
+  - [x] 5.1 Update CrawlerEngine to log email discoveries
     - After calling `extract()`, log results using `logger.logEmailsFound()` or `logger.logNoEmailsFound()`
     - Include URL, email list, and count in log call
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
