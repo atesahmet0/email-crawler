@@ -12,6 +12,7 @@ export interface CLIOptions {
   depth?: number;
   debug?: boolean;
   crossDomain?: boolean;
+  maxPages?: number;
 }
 
 /**
@@ -30,6 +31,7 @@ export function parseArguments(): CLIOptions {
     .option('-d, --depth <number>', 'Maximum crawl depth (default: 3)', '3')
     .option('-D, --debug', 'Enable debug mode for detailed logging')
     .option('-c, --cross-domain', 'Allow crawling across different domains')
+    .option('-m, --max-pages <number>', 'Maximum number of pages to crawl (default: 100)', '100')
     .parse();
 
   const options = program.opts();
@@ -40,6 +42,7 @@ export function parseArguments(): CLIOptions {
     depth: parseInt(options.depth, 10),
     debug: options.debug,
     crossDomain: options.crossDomain,
+    maxPages: parseInt(options.maxPages, 10),
   };
 }
 

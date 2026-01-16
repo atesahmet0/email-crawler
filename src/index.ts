@@ -35,7 +35,12 @@ async function main() {
     const crawler = createCrawlerEngine(httpClient, logger);
 
     // Crawl and extract emails
-    const results = await crawler.crawl(options.url, options.depth || 3, options.crossDomain || false);
+    const results = await crawler.crawl(
+      options.url, 
+      options.depth || 3, 
+      options.crossDomain || false,
+      options.maxPages || 100
+    );
 
     // Read existing emails from output file if it exists
     let existingResults: any[] = [];

@@ -13,7 +13,7 @@ import { ExtractionResult } from '../output/csv-writer.js';
 import { Logger } from '../logger/logger.js';
 
 export interface CrawlerEngine {
-  crawl(startURL: string, maxDepth: number, crossDomain?: boolean): Promise<ExtractionResult[]>;
+  crawl(startURL: string, maxDepth: number, crossDomain?: boolean, maxPages?: number): Promise<ExtractionResult[]>;
 }
 
 interface QueueItem {
@@ -41,9 +41,10 @@ export class CrawlerEngineImpl implements CrawlerEngine {
    * @param startURL - The starting URL to begin crawling
    * @param maxDepth - Maximum depth to crawl (default: 3)
    * @param crossDomain - Allow crawling across different domains (default: false)
+   * @param maxPages - Maximum number of pages to crawl (default: 100)
    * @returns Array of extraction results containing emails and their source URLs
    */
-  async crawl(startURL: string, maxDepth: number = 3, crossDomain: boolean = false): Promise<ExtractionResult[]> {
+  async crawl(startURL: string, maxDepth: number = 3, crossDomain: boolean = false, maxPages: number = 100): Promise<ExtractionResult[]> {
     // Validate the starting URL
     if (!isValid(startURL)) {
       throw new Error(`Invalid URL: ${startURL}`);
@@ -64,8 +65,10 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       results: [],
     };
 
-    // Process queue until empty
-    while (state.queue.length > 0) {
+    let pagesVisited = 0;
+
+    // Process queue until empty or max pages reached
+    while (state.queue.length > 0 && pagesVisited < maxPages) {
       const item = state.queue.shift()!;
       
       // Skip if already visited
@@ -82,6 +85,7 @@ export class CrawlerEngineImpl implements CrawlerEngine {
 
       // Mark as visited
       state.visited.add(item.url);
+      pagesVisited++;
 
       // Log URL visit
       this.logger.logURLVisit(item.url, item.depth);
@@ -105,21 +109,23 @@ export class CrawlerEngineImpl implements CrawlerEngine {
         continue;
       }
 
-      // Parse HTML content
+      // Parse HTML content and extract emails
       let parsed;
+      let emails: string[] = [];
+      
       try {
         parsed = parse(response.body);
-      } catch (error) {
-        this.logger.logHTTPError(item.url, `Failed to parse HTML: ${error instanceof Error ? error.message : String(error)}`);
-        continue;
-      }
-
-      // Extract emails from text content
-      let emails: string[] = [];
-      try {
+        
+        // Clear response body from memory immediately after parsing
+        response.body = '';
+        
+        // Extract emails from text content
         emails = extract(parsed.textContent);
+        
+        // Clear text content from memory after extraction
+        parsed.textContent = '';
       } catch (error) {
-        this.logger.logHTTPError(item.url, `Failed to extract emails: ${error instanceof Error ? error.message : String(error)}`);
+        this.logger.logHTTPError(item.url, `Failed to parse/extract: ${error instanceof Error ? error.message : String(error)}`);
         continue;
       }
 
@@ -145,13 +151,16 @@ export class CrawlerEngineImpl implements CrawlerEngine {
           const newLinks = discoverLinks(parsed.links, baseDomain, item.url, crossDomain);
           const sameDomainLinks = newLinks.length;
           
+          // Clear parsed links from memory
+          parsed.links = [];
+          
           let addedToQueue = 0;
           for (const link of newLinks) {
             try {
               const normalizedLink = normalizeURL(link);
               
-              // Only add if not already visited
-              if (!state.visited.has(normalizedLink)) {
+              // Only add if not already visited and queue isn't too large
+              if (!state.visited.has(normalizedLink) && state.queue.length < 1000) {
                 state.queue.push({
                   url: normalizedLink,
                   depth: item.depth + 1,
@@ -170,6 +179,16 @@ export class CrawlerEngineImpl implements CrawlerEngine {
           // If link discovery fails, just continue without adding links
           this.logger.logHTTPError(item.url, `Failed to discover links: ${error instanceof Error ? error.message : String(error)}`);
         }
+      }
+      
+      // Trigger garbage collection hint by clearing references
+      parsed = null;
+      emails = [];
+      response = null as any;
+      
+      // Allow event loop to process (helps with memory management)
+      if (state.queue.length > 0) {
+        await new Promise(resolve => setImmediate(resolve));
       }
     }
 
