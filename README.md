@@ -20,15 +20,37 @@ bun run build
 
 ## Usage
 
+After building, you can run the tool using:
+
+```bash
+node dist/index.js --url <website-url> --output <output-file.csv> [--depth <max-depth>]
+```
+
+Or using the npm script:
+
 ```bash
 bun start -- --url <website-url> --output <output-file.csv> [--depth <max-depth>]
 ```
 
+### Examples
+
+Extract emails from a website with default depth (3):
+```bash
+node dist/index.js --url https://example.com --output emails.csv
+```
+
+Extract emails with custom depth:
+```bash
+node dist/index.js --url https://example.com --output emails.csv --depth 5
+```
+
 ### Options
 
-- `--url`: Target website URL to crawl (required)
-- `--output`: Output CSV file path (required)
-- `--depth`: Maximum crawl depth (default: 3)
+- `-u, --url <url>`: Target website URL to crawl (required)
+- `-o, --output <file>`: Output CSV file path (required)
+- `-d, --depth <number>`: Maximum crawl depth (default: 3)
+- `-h, --help`: Display help information
+- `-V, --version`: Display version number
 
 ## Development
 
@@ -54,10 +76,12 @@ bun test --watch
 
 ```
 src/
+├── cli/              # Command-line interface
 ├── validators/       # URL validation
 ├── extractors/       # Email extraction
 ├── parsers/          # HTML parsing
 ├── crawler/          # Crawl engine and link discovery
+├── client/           # HTTP client
 ├── output/           # CSV writing and deduplication
 └── index.ts          # Main entry point
 ```

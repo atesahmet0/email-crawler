@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A tool to recursively crawl websites and extract email addresses",
   "main": "dist/index.js",
+  "bin": {
+    "email-extractor": "./dist/index.js"
+  },
   "type": "module",
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",

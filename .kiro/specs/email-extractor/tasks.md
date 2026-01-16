@@ -91,13 +91,13 @@
     - **Property 6: Depth Limiting**
     - **Validates: Requirements 2.4**
 
-- [ ] 10. Implement CLI interface
-  - [ ] 10.1 Create CLI module using commander
+- [x] 10. Implement CLI interface
+  - [x] 10.1 Create CLI module using commander
     - Parse url, output, and depth arguments
     - Display progress messages
     - Display completion summary with email count
     - _Requirements: 6.1, 6.2, 6.3_
-  - [ ] 10.2 Create main entry point
+  - [x] 10.2 Create main entry point
     - Wire all components together
     - Handle errors and display appropriate messages
     - _Requirements: All_
