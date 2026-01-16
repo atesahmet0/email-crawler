@@ -77,8 +77,8 @@
     - Return structured HTTPResponse
     - _Requirements: 1.1, 1.3_
 
-- [ ] 9. Implement crawler engine
-  - [ ] 9.1 Create crawler engine module
+- [x] 9. Implement crawler engine
+  - [x] 9.1 Create crawler engine module
     - Implement crawl() with queue management
     - Track visited URLs to prevent re-processing
     - Enforce depth limits with default of 3
