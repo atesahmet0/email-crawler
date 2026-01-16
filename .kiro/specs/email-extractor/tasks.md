@@ -62,7 +62,7 @@
     - **Validates: Requirements 4.3**
 
 - [ ] 7. Implement deduplication
-  - [ ] 7.1 Create deduplicator module
+  - [x] 7.1 Create deduplicator module
     - Implement deduplicate() with case-insensitive comparison
     - Support checking against existing emails from file
     - _Requirements: 5.1, 5.2, 5.3_
