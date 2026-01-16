@@ -121,13 +121,13 @@
     - **Property 10: Link discovery statistics are logged**
     - **Validates: Requirements 6.1, 6.2, 6.3**
 
-- [ ] 7. Integrate logger into deduplication
-  - [ ] 7.1 Update deduplicate function to accept logger
+- [x] 7. Integrate logger into deduplication
+  - [x] 7.1 Update deduplicate function to accept logger
     - Modify `deduplicate()` function signature to accept optional Logger parameter
     - Update deduplicator class to accept logger in constructor or method
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ] 7.2 Add duplicate email logging
+  - [x] 7.2 Add duplicate email logging
     - Call `logger.logDuplicateEmail(email)` when filtering duplicate emails
     - Call `logger.logDeduplicationSummary(beforeCount, afterCount)` after deduplication completes
     - _Requirements: 4.1, 4.2, 4.3_
