@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { Logger } from '../logger/logger';
 
 export interface HTTPResponse {
   status: number;
@@ -12,9 +13,11 @@ export interface HTTPClient {
 
 export class AxiosHTTPClient implements HTTPClient {
   private readonly timeout: number;
+  private readonly logger: Logger;
 
-  constructor(timeout: number = 10000) {
+  constructor(timeout: number = 10000, logger: Logger) {
     this.timeout = timeout;
+    this.logger = logger;
   }
 
   async fetch(url: string): Promise<HTTPResponse> {
@@ -27,6 +30,9 @@ export class AxiosHTTPClient implements HTTPClient {
         validateStatus: () => true, // Don't throw on any status code
       });
 
+      // Log successful HTTP request
+      this.logger.logHTTPRequest(url, response.status);
+
       return {
         status: response.status,
         body: response.data,
@@ -36,37 +42,48 @@ export class AxiosHTTPClient implements HTTPClient {
         const axiosError = error as AxiosError;
         
         if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
+          const errorMsg = `Connection timeout: ${url}`;
+          this.logger.logHTTPError(url, errorMsg);
           return {
             status: 0,
             body: '',
-            error: `Connection timeout: ${url}`,
+            error: errorMsg,
           };
         }
         
         if (axiosError.code === 'ENOTFOUND' || axiosError.code === 'ECONNREFUSED') {
+          const errorMsg = `Connection failed: Unable to reach ${url}`;
+          this.logger.logHTTPError(url, errorMsg);
           return {
             status: 0,
             body: '',
-            error: `Connection failed: Unable to reach ${url}`,
+            error: errorMsg,
           };
         }
 
+        const errorMsg = `Network error: ${axiosError.message}`;
+        this.logger.logHTTPError(url, errorMsg);
         return {
           status: 0,
           body: '',
-          error: `Network error: ${axiosError.message}`,
+          error: errorMsg,
         };
       }
 
+      const errorMsg = `Unexpected error: ${error instanceof Error ? error.message : String(error)}`;
+      this.logger.logHTTPError(url, errorMsg);
       return {
         status: 0,
         body: '',
-        error: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+        error: errorMsg,
       };
     }
   }
 }
 
-export function createHTTPClient(timeout?: number): HTTPClient {
-  return new AxiosHTTPClient(timeout);
+export function createHTTPClient(timeout?: number, logger?: Logger): HTTPClient {
+  // Use SilentLogger as default if no logger provided for backward compatibility
+  const { SilentLogger } = require('../logger/logger');
+  const defaultLogger = logger || new SilentLogger();
+  return new AxiosHTTPClient(timeout || 10000, defaultLogger);
 }

@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'bun:test';
 import { AxiosHTTPClient } from './http-client';
+import { SilentLogger } from '../logger/logger';
 
 describe('AxiosHTTPClient', () => {
   it('should fetch a valid URL successfully', async () => {
-    const client = new AxiosHTTPClient();
+    const client = new AxiosHTTPClient(10000, new SilentLogger());
     const response = await client.fetch('https://example.com');
     
     expect(response.status).toBe(200);
@@ -12,7 +13,7 @@ describe('AxiosHTTPClient', () => {
   });
 
   it('should handle connection timeout', async () => {
-    const client = new AxiosHTTPClient(1); // 1ms timeout
+    const client = new AxiosHTTPClient(1, new SilentLogger()); // 1ms timeout
     const response = await client.fetch('https://example.com');
     
     expect(response.status).toBe(0);
@@ -20,7 +21,7 @@ describe('AxiosHTTPClient', () => {
   });
 
   it('should handle unreachable host', async () => {
-    const client = new AxiosHTTPClient();
+    const client = new AxiosHTTPClient(10000, new SilentLogger());
     const response = await client.fetch('https://this-domain-does-not-exist-12345.com');
     
     expect(response.status).toBe(0);
@@ -28,7 +29,7 @@ describe('AxiosHTTPClient', () => {
   });
 
   it('should handle HTTP error status codes gracefully', async () => {
-    const client = new AxiosHTTPClient();
+    const client = new AxiosHTTPClient(10000, new SilentLogger());
     // Using a URL that will return 404
     const response = await client.fetch('https://example.com/this-page-does-not-exist-12345');
     

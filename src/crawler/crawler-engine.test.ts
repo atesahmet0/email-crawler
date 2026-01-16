@@ -168,7 +168,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 1);
 
@@ -179,7 +179,7 @@ describe('CrawlerEngine', () => {
 
   it('should throw error for invalid starting URL', async () => {
     const mockClient = createMockHTTPClient(new Map());
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     await expect(crawler.crawl('not-a-url', 1)).rejects.toThrow('Invalid URL');
   });
@@ -193,7 +193,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 0);
 

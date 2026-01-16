@@ -53,7 +53,7 @@
     - **Property 1: Debug flag parsing**
     - **Validates: Requirements 1.1, 1.2**
 
-- [-] 3. Integrate logger into CrawlerEngine
+- [x] 3. Integrate logger into CrawlerEngine
   - [x] 3.1 Update CrawlerEngine to accept logger
     - Modify CrawlerEngineImpl constructor to accept Logger parameter
     - Update createCrawlerEngine factory to accept and pass logger
@@ -77,13 +77,13 @@
     - **Property 3: Skipped URLs are logged with reason**
     - **Validates: Requirements 2.3, 2.4**
 
-- [ ] 4. Integrate logger into HTTPClient
-  - [ ] 4.1 Update HTTPClient to accept logger
+- [x] 4. Integrate logger into HTTPClient
+  - [x] 4.1 Update HTTPClient to accept logger
     - Modify createHTTPClient factory to accept Logger parameter
     - Pass logger to HTTPClient implementation
     - _Requirements: 5.1, 5.2, 5.3_
 
-  - [ ] 4.2 Add HTTP request logging
+  - [x] 4.2 Add HTTP request logging
     - Call `logger.logHTTPRequest(url, status)` after receiving response
     - Call `logger.logHTTPError(url, error)` when request fails
     - _Requirements: 5.1, 5.2_
