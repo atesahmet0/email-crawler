@@ -5,7 +5,7 @@
  */
 
 import { isValid, getDomain, normalizeURL } from '../validators/url-validator.js';
-import { HTTPClient } from '../client/http-client.js';
+import { HTTPClient, HTTPResponse } from '../client/http-client.js';
 import { parse } from '../parsers/html-parser.js';
 import { extract } from '../extractors/email-extractor.js';
 import { discoverLinks } from './link-discovery.js';
@@ -106,10 +106,22 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       }
 
       // Parse HTML content
-      const parsed = parse(response.body);
+      let parsed;
+      try {
+        parsed = parse(response.body);
+      } catch (error) {
+        this.logger.logHTTPError(item.url, `Failed to parse HTML: ${error instanceof Error ? error.message : String(error)}`);
+        continue;
+      }
 
       // Extract emails from text content
-      const emails = extract(parsed.textContent);
+      let emails: string[] = [];
+      try {
+        emails = extract(parsed.textContent);
+      } catch (error) {
+        this.logger.logHTTPError(item.url, `Failed to extract emails: ${error instanceof Error ? error.message : String(error)}`);
+        continue;
+      }
 
       // Log email discovery results
       if (emails.length > 0) {
@@ -128,26 +140,36 @@ export class CrawlerEngineImpl implements CrawlerEngine {
 
       // Discover same-domain links and add to queue (if not at max depth)
       if (item.depth < maxDepth) {
-        const totalLinks = parsed.links.length;
-        const newLinks = discoverLinks(parsed.links, baseDomain, item.url, crossDomain);
-        const sameDomainLinks = newLinks.length;
-        
-        let addedToQueue = 0;
-        for (const link of newLinks) {
-          const normalizedLink = normalizeURL(link);
+        try {
+          const totalLinks = parsed.links.length;
+          const newLinks = discoverLinks(parsed.links, baseDomain, item.url, crossDomain);
+          const sameDomainLinks = newLinks.length;
           
-          // Only add if not already visited
-          if (!state.visited.has(normalizedLink)) {
-            state.queue.push({
-              url: normalizedLink,
-              depth: item.depth + 1,
-            });
-            addedToQueue++;
+          let addedToQueue = 0;
+          for (const link of newLinks) {
+            try {
+              const normalizedLink = normalizeURL(link);
+              
+              // Only add if not already visited
+              if (!state.visited.has(normalizedLink)) {
+                state.queue.push({
+                  url: normalizedLink,
+                  depth: item.depth + 1,
+                });
+                addedToQueue++;
+              }
+            } catch (error) {
+              // Skip invalid links silently
+              continue;
+            }
           }
+          
+          // Log link discovery statistics
+          this.logger.logLinksDiscovered(totalLinks, sameDomainLinks, addedToQueue);
+        } catch (error) {
+          // If link discovery fails, just continue without adding links
+          this.logger.logHTTPError(item.url, `Failed to discover links: ${error instanceof Error ? error.message : String(error)}`);
         }
-        
-        // Log link discovery statistics
-        this.logger.logLinksDiscovered(totalLinks, sameDomainLinks, addedToQueue);
       }
     }
 

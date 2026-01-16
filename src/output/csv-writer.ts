@@ -20,26 +20,30 @@ export class CSVWriterImpl implements CSVWriter {
    * @param append - If true, append to existing file without header; if false, overwrite with header
    */
   async write(results: ExtractionResult[], filePath: string, append: boolean): Promise<void> {
-    let csvContent: string;
+    try {
+      let csvContent: string;
 
-    if (append && existsSync(filePath)) {
-      // Append mode: skip header
-      csvContent = stringify(results, {
-        header: false,
-        columns: ['email', 'sourceURL']
-      });
-      
-      // Read existing content and append
-      const existingContent = readFileSync(filePath, 'utf-8');
-      writeFileSync(filePath, existingContent + csvContent, 'utf-8');
-    } else {
-      // Write mode: include header
-      csvContent = stringify(results, {
-        header: true,
-        columns: ['email', 'sourceURL']
-      });
-      
-      writeFileSync(filePath, csvContent, 'utf-8');
+      if (append && existsSync(filePath)) {
+        // Append mode: skip header
+        csvContent = stringify(results, {
+          header: false,
+          columns: ['email', 'sourceURL']
+        });
+        
+        // Read existing content and append
+        const existingContent = readFileSync(filePath, 'utf-8');
+        writeFileSync(filePath, existingContent + csvContent, 'utf-8');
+      } else {
+        // Write mode: include header
+        csvContent = stringify(results, {
+          header: true,
+          columns: ['email', 'sourceURL']
+        });
+        
+        writeFileSync(filePath, csvContent, 'utf-8');
+      }
+    } catch (error) {
+      throw new Error(`Failed to write CSV file: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

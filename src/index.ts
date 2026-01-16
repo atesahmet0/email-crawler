@@ -38,7 +38,15 @@ async function main() {
     const results = await crawler.crawl(options.url, options.depth || 3, options.crossDomain || false);
 
     // Read existing emails from output file if it exists
-    const existingResults = await csvWriter.read(options.output);
+    let existingResults: any[] = [];
+    try {
+      existingResults = await csvWriter.read(options.output);
+    } catch (error) {
+      // If reading fails, just continue with empty existing results
+      if (options.debug) {
+        console.log('[DEBUG] Could not read existing CSV file (this is normal for first run)');
+      }
+    }
     const existingEmails = existingResults.map(r => r.email);
 
     // Deduplicate results (including against existing emails) with logger
@@ -55,12 +63,27 @@ async function main() {
     // Handle and display errors
     if (error instanceof Error) {
       displayError(error);
+      if (process.env.DEBUG) {
+        console.error('Stack trace:', error.stack);
+      }
     } else {
-      console.error('An unknown error occurred');
+      console.error('An unknown error occurred:', error);
     }
     process.exit(1);
   }
 }
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
 
 // Run the main function
 main();
