@@ -116,8 +116,11 @@ export class CrawlerEngineImpl implements CrawlerEngine {
 
       // Discover same-domain links and add to queue (if not at max depth)
       if (item.depth < maxDepth) {
+        const totalLinks = parsed.links.length;
         const newLinks = discoverLinks(parsed.links, baseDomain, item.url);
+        const sameDomainLinks = newLinks.length;
         
+        let addedToQueue = 0;
         for (const link of newLinks) {
           const normalizedLink = normalizeURL(link);
           
@@ -127,8 +130,12 @@ export class CrawlerEngineImpl implements CrawlerEngine {
               url: normalizedLink,
               depth: item.depth + 1,
             });
+            addedToQueue++;
           }
         }
+        
+        // Log link discovery statistics
+        this.logger.logLinksDiscovered(totalLinks, sameDomainLinks, addedToQueue);
       }
     }
 

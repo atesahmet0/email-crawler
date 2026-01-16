@@ -110,8 +110,8 @@
     - **Property 5: Email count is logged**
     - **Validates: Requirements 3.4**
 
-- [ ] 6. Integrate logger into link discovery
-  - [ ] 6.1 Update CrawlerEngine to log link discovery statistics
+- [x] 6. Integrate logger into link discovery
+  - [x] 6.1 Update CrawlerEngine to log link discovery statistics
     - After calling `discoverLinks()`, calculate and log statistics
     - Log total links found, same-domain links, and links added to queue
     - Call `logger.logLinksDiscovered(totalLinks, sameDomainLinks, addedToQueue)`
