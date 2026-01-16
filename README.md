@@ -1,4 +1,4 @@
-# Email Extractor
+# Email Crawler
 
 A command-line tool that recursively crawls websites to extract email addresses and saves them to a CSV file.
 

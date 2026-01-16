@@ -28,10 +28,14 @@ export class AxiosHTTPClient implements HTTPClient {
           'User-Agent': 'Mozilla/5.0 (compatible; EmailExtractor/1.0)',
         },
         validateStatus: () => true, // Don't throw on any status code
+        maxRedirects: 5,
       });
 
       // Log successful HTTP request
       this.logger.logHTTPRequest(url, response.status);
+
+      // Ensure body is a string
+      const body = typeof response.data === 'string' ? response.data : String(response.data || '');
 
       return {
         status: response.status,

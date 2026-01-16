@@ -87,7 +87,14 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       this.logger.logURLVisit(item.url, item.depth);
 
       // Fetch the page
-      const response = await this.httpClient.fetch(item.url);
+      let response: HTTPResponse;
+      try {
+        response = await this.httpClient.fetch(item.url);
+      } catch (error) {
+        // Handle any unexpected errors during fetch
+        this.logger.logHTTPError(item.url, error instanceof Error ? error.message : String(error));
+        continue;
+      }
 
       // Skip if there was an error or non-success status
       if (response.error || response.status < 200 || response.status >= 300) {
