@@ -2,13 +2,13 @@
 
 - [x] 1. Set up project structure and dependencies
   - Initialize Node.js project with TypeScript configuration
-  - Install dependencies: node-fetch, cheerio, commander
+  - Install dependencies: axios, cheerio, commander, csv-parse, csv-stringify
   - Install dev dependencies: vitest, fast-check, @types packages
   - Configure tsconfig.json and package.json scripts
   - _Requirements: All_
 
-- [ ] 2. Implement URL validation
-  - [ ] 2.1 Create URL validator module
+- [x] 2. Implement URL validation
+  - [x] 2.1 Create URL validator module
     - Implement isValid() to check URL format
     - Implement getDomain() to extract domain from URL
     - Implement isSameDomain() for domain comparison
@@ -18,8 +18,8 @@
     - **Property 1: Invalid URL Rejection**
     - **Validates: Requirements 1.2**
 
-- [ ] 3. Implement email extraction
-  - [ ] 3.1 Create email extractor module
+- [-] 3. Implement email extraction
+  - [x] 3.1 Create email extractor module
     - Implement RFC 5321 compliant email regex pattern
     - Implement extract() to find all emails in text
     - Implement isValidEmail() for individual validation
@@ -32,12 +32,12 @@
     - **Property 3: Invalid Email Rejection**
     - **Validates: Requirements 3.4**
 
-- [ ] 4. Implement HTML parsing and link discovery
-  - [ ] 4.1 Create HTML parser module using cheerio
+- [x] 4. Implement HTML parsing and link discovery
+  - [x] 4.1 Create HTML parser module using cheerio
     - Implement parse() to extract text content and links
     - Handle malformed HTML gracefully
     - _Requirements: 2.1_
-  - [ ] 4.2 Create link discovery module
+  - [x] 4.2 Create link discovery module
     - Implement discoverLinks() to filter same-domain links
     - Handle relative URL conversion to absolute
     - _Requirements: 2.1, 2.2_
@@ -48,11 +48,10 @@
 - [ ] 5. Checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Implement CSV output
-  - [ ] 6.1 Create CSV writer module
-    - Implement serialize() with proper escaping for commas, quotes, newlines
-    - Implement parse() to read CSV back to ExtractionResult[]
-    - Implement write() for file output with header
+- [-] 6. Implement CSV output
+  - [x] 6.1 Create CSV writer module
+    - Implement write() using csv-stringify for file output with header
+    - Implement read() using csv-parse to read CSV back to ExtractionResult[]
     - Implement append mode that skips header
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
   - [ ]* 6.2 Write property test for CSV round-trip
@@ -72,7 +71,7 @@
     - **Validates: Requirements 5.1, 5.3**
 
 - [ ] 8. Implement HTTP client
-  - [ ] 8.1 Create HTTP client module using node-fetch
+  - [ ] 8.1 Create HTTP client module using axios
     - Implement fetch() with error handling
     - Handle timeouts and connection failures
     - Return structured HTTPResponse

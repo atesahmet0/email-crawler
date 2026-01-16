@@ -160,16 +160,14 @@ interface Deduplicator {
 ```
 
 ### CSV Writer
-- Writes results to CSV format
-- Handles special character escaping
+- Writes results to CSV format using csv-stringify
+- Reads and parses CSV files using csv-parse
 - Supports append mode
 
 ```typescript
 interface CSVWriter {
-  write(results: ExtractionResult[], filePath: string, append: boolean): void;
-  read(filePath: string): ExtractionResult[];
-  serialize(results: ExtractionResult[]): string;
-  parse(csv: string): ExtractionResult[];
+  write(results: ExtractionResult[], filePath: string, append: boolean): Promise<void>;
+  read(filePath: string): Promise<ExtractionResult[]>;
 }
 ```
 
@@ -259,10 +257,10 @@ interface CrawlConfig {
 ## Testing Strategy
 
 ### Technology Stack
-- **Language**: TypeScript with Node.js
-- **HTTP Client**: node-fetch (for fetching web pages)
+- **Language**: TypeScript with Node.js (using Bun runtime)
+- **HTTP Client**: axios (for robust HTTP fetching with better error handling and timeouts)
 - **HTML Parsing**: cheerio (for parsing HTML and extracting links)
-- **CSV Handling**: Built-in string manipulation with proper escaping
+- **CSV Handling**: csv-parse and csv-stringify (for robust CSV parsing and serialization)
 - **CLI**: commander (for command-line argument parsing)
 - **Testing Framework**: Vitest
 - **Property-Based Testing**: fast-check
