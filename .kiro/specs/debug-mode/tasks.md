@@ -32,13 +32,13 @@
     - **Property 11: Debug messages have consistent prefix**
     - **Validates: Requirements 7.1**
 
-- [ ] 2. Update CLI to support debug flag
-  - [ ] 2.1 Add debug option to CLI parser
+- [x] 2. Update CLI to support debug flag
+  - [x] 2.1 Add debug option to CLI parser
     - Modify `parseArguments()` in `src/cli/cli.ts` to accept `--debug` or `-D` flag
     - Update CLIOptions interface to include optional `debug` boolean field
     - _Requirements: 1.1_
 
-  - [ ] 2.2 Add debug mode activation message
+  - [x] 2.2 Add debug mode activation message
     - Create `displayDebugModeActive()` function in CLI module
     - Display confirmation message when debug mode is enabled
     - _Requirements: 1.3_

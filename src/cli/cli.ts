@@ -10,6 +10,7 @@ export interface CLIOptions {
   url: string;
   output: string;
   depth?: number;
+  debug?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export function parseArguments(): CLIOptions {
     .requiredOption('-u, --url <url>', 'Target URL to crawl')
     .requiredOption('-o, --output <file>', 'Output CSV file path')
     .option('-d, --depth <number>', 'Maximum crawl depth (default: 3)', '3')
+    .option('-D, --debug', 'Enable debug mode for detailed logging')
     .parse();
 
   const options = program.opts();
@@ -34,6 +36,7 @@ export function parseArguments(): CLIOptions {
     url: options.url,
     output: options.output,
     depth: parseInt(options.depth, 10),
+    debug: options.debug,
   };
 }
 
@@ -62,4 +65,11 @@ export function displayCompletionSummary(emailCount: number, outputPath: string)
  */
 export function displayError(error: Error): void {
   console.error(`\nError: ${error.message}`);
+}
+
+/**
+ * Display debug mode activation message
+ */
+export function displayDebugModeActive(): void {
+  console.log('[DEBUG] Debug mode is active - detailed logging enabled');
 }
