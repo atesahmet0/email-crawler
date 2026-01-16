@@ -32,6 +32,13 @@ export interface Logger {
   logHTTPError(url: string, error: string): void;
 
   /**
+   * Log when a page is skipped due to non-success HTTP status
+   * @param url - The URL that was skipped
+   * @param status - The HTTP status code
+   */
+  logHTTPSkip(url: string, status: number): void;
+
+  /**
    * Log when emails are found on a page
    * @param url - The source URL
    * @param emails - Array of email addresses found
@@ -97,6 +104,10 @@ export class DebugLogger implements Logger {
     console.log(`${this.prefix} HTTP Error for ${url}: ${error}`);
   }
 
+  logHTTPSkip(url: string, status: number): void {
+    console.log(`${this.prefix} Skipping page (HTTP ${status}): ${url}`);
+  }
+
   logEmailsFound(url: string, emails: string[], count: number): void {
     console.log(`${this.prefix} Found ${count} email(s) on ${url}:`);
     emails.forEach(email => {
@@ -135,6 +146,7 @@ export class SilentLogger implements Logger {
   logURLSkipped(): void {}
   logHTTPRequest(): void {}
   logHTTPError(): void {}
+  logHTTPSkip(): void {}
   logEmailsFound(): void {}
   logNoEmailsFound(): void {}
   logLinksDiscovered(): void {}

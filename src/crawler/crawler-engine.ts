@@ -90,6 +90,10 @@ export class CrawlerEngineImpl implements CrawlerEngine {
 
       // Skip if there was an error or non-success status
       if (response.error || response.status < 200 || response.status >= 300) {
+        // Log skip message for non-success HTTP status
+        if (response.status !== 0) {
+          this.logger.logHTTPSkip(item.url, response.status);
+        }
         continue;
       }
 

@@ -136,15 +136,15 @@
     - **Property 6: Duplicate emails are logged with reason**
     - **Validates: Requirements 4.1, 4.2**
 
-- [ ] 8. Wire everything together in main entry point
-  - [ ] 8.1 Update main function to create and pass logger
+- [x] 8. Wire everything together in main entry point
+  - [x] 8.1 Update main function to create and pass logger
     - Parse CLI options including debug flag
     - Create logger using `createLogger(options.debug || false)`
     - Display debug mode active message if enabled
     - Pass logger to all component factories (HTTPClient, CrawlerEngine, deduplicator)
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 8.2 Add HTTP skip logging to main function
+  - [x] 8.2 Add HTTP skip logging to main function
     - After receiving non-success HTTP response, log skip message before continuing
     - Call appropriate logger method when skipping due to HTTP errors
     - _Requirements: 5.3_
