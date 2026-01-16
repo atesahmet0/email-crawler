@@ -53,18 +53,18 @@
     - **Property 1: Debug flag parsing**
     - **Validates: Requirements 1.1, 1.2**
 
-- [ ] 3. Integrate logger into CrawlerEngine
-  - [ ] 3.1 Update CrawlerEngine to accept logger
+- [-] 3. Integrate logger into CrawlerEngine
+  - [x] 3.1 Update CrawlerEngine to accept logger
     - Modify CrawlerEngineImpl constructor to accept Logger parameter
     - Update createCrawlerEngine factory to accept and pass logger
     - Store logger as instance variable
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-  - [ ] 3.2 Add URL visit logging
+  - [x] 3.2 Add URL visit logging
     - Call `logger.logURLVisit(url, depth)` when processing each URL from queue
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 3.3 Add URL skip logging
+  - [x] 3.3 Add URL skip logging
     - Call `logger.logURLSkipped(url, 'already-visited')` when URL is in visited set
     - Call `logger.logURLSkipped(url, 'depth-limit')` when depth exceeds maxDepth
     - _Requirements: 2.3, 2.4_

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { CrawlerEngineImpl } from './crawler-engine.js';
 import { HTTPClient, HTTPResponse } from '../client/http-client.js';
+import { SilentLogger } from '../logger/logger.js';
 
 describe('CrawlerEngine', () => {
   // Mock HTTP client for testing
@@ -17,6 +18,9 @@ describe('CrawlerEngine', () => {
     };
   };
 
+  // Create a silent logger for tests
+  const logger = new SilentLogger();
+
   it('should crawl a single page and extract emails', async () => {
     const responses = new Map<string, HTTPResponse>([
       ['https://example.com', {
@@ -26,7 +30,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 0);
 
@@ -48,7 +52,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 1);
 
@@ -69,7 +73,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 2);
 
@@ -99,7 +103,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     // With depth 1, should only visit example.com and level1
     const results = await crawler.crawl('https://example.com', 1);
@@ -124,7 +128,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 1);
 
@@ -143,7 +147,7 @@ describe('CrawlerEngine', () => {
     ]);
 
     const mockClient = createMockHTTPClient(responses);
-    const crawler = new CrawlerEngineImpl(mockClient);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
 
     const results = await crawler.crawl('https://example.com', 0);
 

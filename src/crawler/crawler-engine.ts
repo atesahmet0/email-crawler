@@ -10,6 +10,7 @@ import { parse } from '../parsers/html-parser.js';
 import { extract } from '../extractors/email-extractor.js';
 import { discoverLinks } from './link-discovery.js';
 import { ExtractionResult } from '../output/csv-writer.js';
+import { Logger } from '../logger/logger.js';
 
 export interface CrawlerEngine {
   crawl(startURL: string, maxDepth: number): Promise<ExtractionResult[]>;
@@ -28,9 +29,11 @@ interface CrawlState {
 
 export class CrawlerEngineImpl implements CrawlerEngine {
   private httpClient: HTTPClient;
+  private logger: Logger;
 
-  constructor(httpClient: HTTPClient) {
+  constructor(httpClient: HTTPClient, logger: Logger) {
     this.httpClient = httpClient;
+    this.logger = logger;
   }
 
   /**
@@ -66,16 +69,21 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       
       // Skip if already visited
       if (state.visited.has(item.url)) {
+        this.logger.logURLSkipped(item.url, 'already-visited');
         continue;
       }
 
       // Skip if depth exceeds maximum
       if (item.depth > maxDepth) {
+        this.logger.logURLSkipped(item.url, 'depth-limit');
         continue;
       }
 
       // Mark as visited
       state.visited.add(item.url);
+
+      // Log URL visit
+      this.logger.logURLVisit(item.url, item.depth);
 
       // Fetch the page
       const response = await this.httpClient.fetch(item.url);
@@ -124,8 +132,9 @@ export class CrawlerEngineImpl implements CrawlerEngine {
 /**
  * Creates a new crawler engine instance
  * @param httpClient - HTTP client to use for fetching pages
+ * @param logger - Logger instance for debug output
  * @returns CrawlerEngine instance
  */
-export function createCrawlerEngine(httpClient: HTTPClient): CrawlerEngine {
-  return new CrawlerEngineImpl(httpClient);
+export function createCrawlerEngine(httpClient: HTTPClient, logger: Logger): CrawlerEngine {
+  return new CrawlerEngineImpl(httpClient, logger);
 }
