@@ -11,6 +11,7 @@ export interface CLIOptions {
   output: string;
   depth?: number;
   debug?: boolean;
+  crossDomain?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export function parseArguments(): CLIOptions {
     .requiredOption('-o, --output <file>', 'Output CSV file path')
     .option('-d, --depth <number>', 'Maximum crawl depth (default: 3)', '3')
     .option('-D, --debug', 'Enable debug mode for detailed logging')
+    .option('-c, --cross-domain', 'Allow crawling across different domains')
     .parse();
 
   const options = program.opts();
@@ -37,6 +39,7 @@ export function parseArguments(): CLIOptions {
     output: options.output,
     depth: parseInt(options.depth, 10),
     debug: options.debug,
+    crossDomain: options.crossDomain,
   };
 }
 

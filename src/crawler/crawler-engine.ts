@@ -13,7 +13,7 @@ import { ExtractionResult } from '../output/csv-writer.js';
 import { Logger } from '../logger/logger.js';
 
 export interface CrawlerEngine {
-  crawl(startURL: string, maxDepth: number): Promise<ExtractionResult[]>;
+  crawl(startURL: string, maxDepth: number, crossDomain?: boolean): Promise<ExtractionResult[]>;
 }
 
 interface QueueItem {
@@ -40,9 +40,10 @@ export class CrawlerEngineImpl implements CrawlerEngine {
    * Crawls a website starting from the given URL up to the specified depth
    * @param startURL - The starting URL to begin crawling
    * @param maxDepth - Maximum depth to crawl (default: 3)
+   * @param crossDomain - Allow crawling across different domains (default: false)
    * @returns Array of extraction results containing emails and their source URLs
    */
-  async crawl(startURL: string, maxDepth: number = 3): Promise<ExtractionResult[]> {
+  async crawl(startURL: string, maxDepth: number = 3, crossDomain: boolean = false): Promise<ExtractionResult[]> {
     // Validate the starting URL
     if (!isValid(startURL)) {
       throw new Error(`Invalid URL: ${startURL}`);
@@ -121,7 +122,7 @@ export class CrawlerEngineImpl implements CrawlerEngine {
       // Discover same-domain links and add to queue (if not at max depth)
       if (item.depth < maxDepth) {
         const totalLinks = parsed.links.length;
-        const newLinks = discoverLinks(parsed.links, baseDomain, item.url);
+        const newLinks = discoverLinks(parsed.links, baseDomain, item.url, crossDomain);
         const sameDomainLinks = newLinks.length;
         
         let addedToQueue = 0;

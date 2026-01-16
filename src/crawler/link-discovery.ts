@@ -6,7 +6,7 @@
 import { getDomain, isValid } from '../validators/url-validator';
 
 export interface LinkDiscovery {
-  discoverLinks(links: string[], baseDomain: string, baseURL: string): string[];
+  discoverLinks(links: string[], baseDomain: string, baseURL: string, crossDomain?: boolean): string[];
 }
 
 /**
@@ -16,12 +16,14 @@ export interface LinkDiscovery {
  * @param links - Array of URLs (can be relative or absolute)
  * @param baseDomain - The domain to filter for (e.g., "example.com")
  * @param baseURL - The base URL to resolve relative links against
- * @returns Array of absolute URLs that belong to the same domain
+ * @param crossDomain - Allow links from different domains (default: false)
+ * @returns Array of absolute URLs that belong to the same domain (or all domains if crossDomain is true)
  */
 export function discoverLinks(
   links: string[],
   baseDomain: string,
-  baseURL: string
+  baseURL: string,
+  crossDomain: boolean = false
 ): string[] {
   const discoveredLinks: string[] = [];
   const seenLinks = new Set<string>();
@@ -40,8 +42,8 @@ export function discoverLinks(
       // Get the domain of this link
       const linkDomain = getDomain(absoluteURLString);
 
-      // Only include if it's the same domain and we haven't seen it yet
-      if (linkDomain === baseDomain && !seenLinks.has(absoluteURLString)) {
+      // Only include if it's the same domain (or crossDomain is enabled) and we haven't seen it yet
+      if ((crossDomain || linkDomain === baseDomain) && !seenLinks.has(absoluteURLString)) {
         discoveredLinks.push(absoluteURLString);
         seenLinks.add(absoluteURLString);
       }

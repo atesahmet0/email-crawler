@@ -112,4 +112,31 @@ describe('Link Discovery', () => {
     expect(result).toHaveLength(1);
     expect(result).toContain('https://example.com/page1');
   });
+
+  it('should allow cross-domain links when crossDomain is true', () => {
+    const links = [
+      'https://example.com/page1',
+      'https://other.com/page2',
+      'https://another.com/page3',
+    ];
+
+    const result = discoverLinks(links, baseDomain, baseURL, true);
+
+    expect(result).toHaveLength(3);
+    expect(result).toContain('https://example.com/page1');
+    expect(result).toContain('https://other.com/page2');
+    expect(result).toContain('https://another.com/page3');
+  });
+
+  it('should still filter same-domain when crossDomain is false', () => {
+    const links = [
+      'https://example.com/page1',
+      'https://other.com/page2',
+    ];
+
+    const result = discoverLinks(links, baseDomain, baseURL, false);
+
+    expect(result).toHaveLength(1);
+    expect(result).toContain('https://example.com/page1');
+  });
 });

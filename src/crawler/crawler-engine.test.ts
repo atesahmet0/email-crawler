@@ -202,4 +202,62 @@ describe('CrawlerEngine', () => {
     expect(results.map(r => r.email)).toContain('sales@example.com');
     expect(results.map(r => r.email)).toContain('support@example.com');
   });
+
+  it('should follow cross-domain links when crossDomain is true', async () => {
+    const responses = new Map<string, HTTPResponse>([
+      ['https://example.com', {
+        status: 200,
+        body: '<html><body><a href="/internal">Internal</a><a href="https://external.com">External</a>Email: main@example.com</body></html>',
+      }],
+      ['https://example.com/internal', {
+        status: 200,
+        body: '<html><body>Email: internal@example.com</body></html>',
+      }],
+      ['https://external.com', {
+        status: 200,
+        body: '<html><body>Email: external@external.com</body></html>',
+      }],
+    ]);
+
+    const mockClient = createMockHTTPClient(responses);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
+
+    const results = await crawler.crawl('https://example.com', 1, true);
+
+    // Should have visited all three URLs
+    expect(mockClient.fetch).toHaveBeenCalledTimes(3);
+    expect(results).toHaveLength(3);
+    expect(results.map(r => r.email)).toContain('main@example.com');
+    expect(results.map(r => r.email)).toContain('internal@example.com');
+    expect(results.map(r => r.email)).toContain('external@external.com');
+  });
+
+  it('should not follow cross-domain links when crossDomain is false', async () => {
+    const responses = new Map<string, HTTPResponse>([
+      ['https://example.com', {
+        status: 200,
+        body: '<html><body><a href="/internal">Internal</a><a href="https://external.com">External</a>Email: main@example.com</body></html>',
+      }],
+      ['https://example.com/internal', {
+        status: 200,
+        body: '<html><body>Email: internal@example.com</body></html>',
+      }],
+      ['https://external.com', {
+        status: 200,
+        body: '<html><body>Email: external@external.com</body></html>',
+      }],
+    ]);
+
+    const mockClient = createMockHTTPClient(responses);
+    const crawler = new CrawlerEngineImpl(mockClient, logger);
+
+    const results = await crawler.crawl('https://example.com', 1, false);
+
+    // Should only have visited example.com and example.com/internal
+    expect(mockClient.fetch).toHaveBeenCalledTimes(2);
+    expect(results).toHaveLength(2);
+    expect(results.map(r => r.email)).toContain('main@example.com');
+    expect(results.map(r => r.email)).toContain('internal@example.com');
+    expect(results.map(r => r.email)).not.toContain('external@external.com');
+  });
 });
